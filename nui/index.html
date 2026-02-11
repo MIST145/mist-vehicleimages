@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Images Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1 class="title">
+                    <span class="icon">🚗</span>
+                    <span id="menuTitle">Vehicle Image Management</span>
+                </h1>
+                <div class="stats" id="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total:</span>
+                        <span class="stat-value" id="totalVehicles">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Custom:</span>
+                        <span class="stat-value" id="customVehicles">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Category:</span>
+                        <span class="stat-value" id="currentCategory">All</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-icon" id="refreshBtn" title="Refresh">
+                    <span>🔄</span>
+                </button>
+                <button class="btn btn-icon btn-close" id="closeBtn" title="Close (ESC)">
+                    <span>✕</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search model..." 
+                    autocomplete="off"
+                >
+                <span class="search-icon">🔍</span>
+            </div>
+            
+            <div class="category-filter">
+                <select id="categorySelect">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            
+            <div class="toolbar-actions" id="adminActions">
+                <button class="btn btn-primary" id="addBtn">
+                    <span>➕</span> Add
+                </button>
+                <button class="btn btn-secondary" id="importBtn">
+                    <span>📥</span> Import
+                </button>
+                <button class="btn btn-secondary" id="exportBtn">
+                    <span>📤</span> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="vehicle-grid" id="vehicleGrid">
+                <!-- Vehicles will be loaded here -->
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+            
+            <div class="no-results hidden" id="noResults">
+                <span class="icon">🔍</span>
+                <p>No results found</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+            <button class="btn btn-small" id="prevPage">← Previous</button>
+            <span class="page-info">
+                Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+            </span>
+            <button class="btn btn-small" id="nextPage">Next →</button>
+        </div>
+    </div>
+
+    <!-- Modal - Add/Edit Vehicle -->
+    <div class="modal hidden" id="vehicleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Vehicle</h2>
+                <button class="btn btn-icon btn-close" id="modalCloseBtn">
+                    <span>✕</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modelInput">Model Name</label>
+                    <input 
+                        type="text" 
+                        id="modelInput" 
+                        placeholder="Ex: adder" 
+                        autocomplete="off"
+                    >
+                    <small>Enter the vehicle's spawn name (without .png)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="urlInput">Image URL</label>
+                    <input 
+                        type="text" 
+                        id="urlInput" 
+                        placeholder="https://..." 
+                        autocomplete="off"
+                    >
+                    <small>Full image URL (PNG, JPG or WEBP)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="categoryInput">Category</label>
+                    <select id="categoryInput">
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="customInput">
+                        <span>Custom Vehicle</span>
+                    </label>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <p class="preview-label">Preview:</p>
+                    <div class="preview-box">
+                        <img id="previewImage" src="" alt="Preview" class="hidden">
+                        <div class="preview-placeholder" id="previewPlaceholder">
+                            <span>🖼️</span>
+                            <p>Enter a URL to see the preview</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal - Import -->
+    <div class="modal hidden" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Import Data</h2>
+                <button class="btn btn-icon btn-close" id="importModalCloseBtn">
+                    <span>✕</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="importInput">Paste JSON here:</label>
+                    <textarea 
+                        id="importInput" 
+                        rows="10" 
+                        placeholder='{"pictures": [...]}'
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="overwriteInput">
+                        <span>Overwrite existing data</span>
+                    </label>
+                    <small class="warning">⚠️ This will replace the entire current database!</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="importCancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="importConfirmBtn">Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal - Preview -->
+    <div class="modal hidden" id="previewModal">
+        <div class="modal-content modal-preview">
+            <div class="modal-header">
+                <h2 id="previewTitle">Preview</h2>
+                <button class="btn btn-icon btn-close" id="previewCloseBtn">
+                    <span>✕</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-full">
+                    <img id="previewFullImage" src="" alt="Vehicle Preview">
+                    <div class="preview-info">
+                        <p><strong>Model:</strong> <span id="previewModel"></span></p>
+                        <p><strong>Category:</strong> <span id="previewCategory"></span></p>
+                        <p><strong>URL:</strong> <a id="previewUrl" href="" target="_blank"></a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Context Menu -->
+    <div class="context-menu hidden" id="contextMenu">
+        <div class="context-item" id="contextEdit">
+            <span>✏️</span> Edit
+        </div>
+        <div class="context-item" id="contextPreview">
+            <span>👁️</span> Preview
+        </div>
+        <div class="context-item context-danger" id="contextDelete">
+            <span>🗑️</span> Delete
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
