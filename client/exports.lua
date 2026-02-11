@@ -1,28 +1,17 @@
---[[ ===================================================== ]]--
---[[          CLIENT EXPORTS (FIXED & IMPROVED)           ]]--
---[[ ===================================================== ]]--
-
---[[ ===================================================== ]]--
---[[                  EXPORT PRINCIPAL                      ]]--
---[[ ===================================================== ]]--
-
 function GetVehicleImage(model)
     if not model then
         return Config.Images.placeholder
     end
-    
-    -- Remover .png se existir
+
     model = string.lower(model:gsub('.png', ''))
-    
-    -- Verificar cache primeiro
+
     local cacheKey = 'image_' .. model
     local cached = GetFromCache(cacheKey)
-    
+
     if cached then
         return cached
     end
-    
-    -- Buscar diretamente nos dados carregados
+
     local state = _G.VehicleImagesState
     if state and state.vehicleData then
         for _, vehicle in ipairs(state.vehicleData) do
@@ -33,45 +22,37 @@ function GetVehicleImage(model)
             end
         end
     end
-    
+
     return Config.Images.placeholder
 end
 
 exports('GetVehicleImage', GetVehicleImage)
 exports('GetImage', GetVehicleImage)
 
---[[ ===================================================== ]]--
---[[                  VERIFICAÇÃO DE IMAGEM                 ]]--
---[[ ===================================================== ]]--
-
 function HasVehicleImage(model)
     if not model then
         return false
     end
-    
+
     model = string.lower(model)
-    
+
     local state = _G.VehicleImagesState
     if not state or not state.vehicleData then
         return false
     end
-    
+
     for _, vehicle in ipairs(state.vehicleData) do
         local vehicleModel = string.lower(vehicle.name:gsub('.png', ''))
         if vehicleModel == model then
             return true
         end
     end
-    
+
     return false
 end
 
 exports('HasVehicleImage', HasVehicleImage)
 exports('HasImage', HasVehicleImage)
-
---[[ ===================================================== ]]--
---[[                  OBTER TODOS OS VEÍCULOS               ]]--
---[[ ===================================================== ]]--
 
 function GetAllVehicles()
     local state = _G.VehicleImagesState
@@ -80,99 +61,83 @@ end
 
 exports('GetAllVehicles', GetAllVehicles)
 
---[[ ===================================================== ]]--
---[[                  OBTER POR CATEGORIA                   ]]--
---[[ ===================================================== ]]--
-
 function GetVehiclesByCategory(category)
     if not category then
         return {}
     end
-    
+
     local state = _G.VehicleImagesState
     if not state or not state.vehicleData then
         return {}
     end
-    
+
     local results = {}
-    
+
     for _, vehicle in ipairs(state.vehicleData) do
         if vehicle.category and vehicle.category == category then
             table.insert(results, vehicle)
         end
     end
-    
+
     return results
 end
 
 exports('GetVehiclesByCategory', GetVehiclesByCategory)
 exports('GetByCategory', GetVehiclesByCategory)
 
---[[ ===================================================== ]]--
---[[                  PESQUISAR VEÍCULOS                    ]]--
---[[ ===================================================== ]]--
-
 function SearchVehicles(query)
     if not query or query == '' then
         return GetAllVehicles()
     end
-    
+
     local state = _G.VehicleImagesState
     if not state or not state.vehicleData then
         return {}
     end
-    
+
     query = string.lower(query)
     local results = {}
-    
+
     for _, vehicle in ipairs(state.vehicleData) do
         local vehicleModel = string.lower(vehicle.name:gsub('.png', ''))
         if string.find(vehicleModel, query, 1, true) then
             table.insert(results, vehicle)
         end
     end
-    
+
     return results
 end
 
 exports('SearchVehicles', SearchVehicles)
 exports('Search', SearchVehicles)
 
---[[ ===================================================== ]]--
---[[                  OBTER MODELO ESPECÍFICO               ]]--
---[[ ===================================================== ]]--
-
 function GetVehicle(model)
     if not model then
         return nil
     end
-    
+
     model = string.lower(model)
-    
+
     local state = _G.VehicleImagesState
     if not state or not state.vehicleData then
         return nil
     end
-    
+
     for _, vehicle in ipairs(state.vehicleData) do
         local vehicleModel = string.lower(vehicle.name:gsub('.png', ''))
         if vehicleModel == model then
             return vehicle
         end
     end
-    
+
     return nil
 end
 
 exports('GetVehicle', GetVehicle)
 
---[[ ===================================================== ]]--
---[[                  OBTER INFORMAÇÃO COMPLETA             ]]--
---[[ ===================================================== ]]--
-
 function GetVehicleInfo(model)
     local vehicle = GetVehicle(model)
-    
+
     if not vehicle then
         return {
             exists = false,
@@ -182,7 +147,7 @@ function GetVehicleInfo(model)
             custom = false
         }
     end
-    
+
     return {
         exists = true,
         model = vehicle.name:gsub('.png', ''),
@@ -198,10 +163,6 @@ end
 
 exports('GetVehicleInfo', GetVehicleInfo)
 exports('GetInfo', GetVehicleInfo)
-
---[[ ===================================================== ]]--
---[[                  CONTROLE DO MENU                      ]]--
---[[ ===================================================== ]]--
 
 function OpenVehicleMenu()
     OpenMenu()
@@ -236,10 +197,6 @@ end
 
 exports('IsMenuOpen', IsMenuOpenExport)
 
---[[ ===================================================== ]]--
---[[                  CACHE MANAGEMENT                      ]]--
---[[ ===================================================== ]]--
-
 function ClearVehicleCache()
     ClearCache()
     return true
@@ -252,7 +209,7 @@ function GetCacheSize()
     if not state or not state.playerCache then
         return 0
     end
-    
+
     local count = 0
     for _ in pairs(state.playerCache) do
         count = count + 1
@@ -261,10 +218,6 @@ function GetCacheSize()
 end
 
 exports('GetCacheSize', GetCacheSize)
-
---[[ ===================================================== ]]--
---[[                  UTILITÁRIOS                           ]]--
---[[ ===================================================== ]]--
 
 function GetTotalVehicles()
     local state = _G.VehicleImagesState
