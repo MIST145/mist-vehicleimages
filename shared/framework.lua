@@ -1,20 +1,15 @@
---[[ ===================================================== ]]--
---[[          FRAMEWORK INTEGRATION (ESX OPTIONAL)        ]]--
---[[ ===================================================== ]]--
-
 Framework = {}
 Framework.Type = 'standalone'
 Framework.ESX = nil
 
---[[ Detectar Framework ]]--
 if GetResourceState('es_extended') == 'started' then
     Framework.Type = 'esx'
-    
+
     if IsDuplicityVersion() then
-        -- Server-side
+
         Framework.ESX = exports['es_extended']:getSharedObject()
     else
-        -- Client-side
+
         CreateThread(function()
             while Framework.ESX == nil do
                 Framework.ESX = exports['es_extended']:getSharedObject()
@@ -24,7 +19,6 @@ if GetResourceState('es_extended') == 'started' then
     end
 end
 
---[[ Verificar Admin ]]--
 function Framework.IsAdmin(source)
     if Framework.Type == 'esx' and Framework.ESX then
         if IsDuplicityVersion() then
@@ -36,29 +30,28 @@ function Framework.IsAdmin(source)
         end
         return false
     else
-        -- Sistema ACE standalone
+
         if not Config.UsePermissions then
             return true
         end
-        
+
         for _, group in ipairs(Config.AdminGroups) do
             if IsPlayerAceAllowed(source, 'group.' .. group) then
                 return true
             end
         end
-        
+
         return false
     end
 end
 
---[[ Mostrar Notificação ]]--
 function Framework.ShowNotification(source, message, type)
     if not IsDuplicityVersion() then
-        -- Client-side
+
         if Framework.Type == 'esx' and Framework.ESX then
             Framework.ESX.ShowNotification(message)
         else
-            -- Sistema NUI standalone
+
             SendNUIMessage({
                 action = 'notification',
                 type = type or 'info',
@@ -68,7 +61,7 @@ function Framework.ShowNotification(source, message, type)
             })
         end
     else
-        -- Server-side
+
         if Framework.Type == 'esx' then
             TriggerClientEvent('esx:showNotification', source, message)
         else
@@ -80,7 +73,6 @@ function Framework.ShowNotification(source, message, type)
     end
 end
 
---[[ Obter Nome do Jogador ]]--
 function Framework.GetPlayerName(source)
     if Framework.Type == 'esx' and Framework.ESX and IsDuplicityVersion() then
         local xPlayer = Framework.ESX.GetPlayerFromId(source)
@@ -88,7 +80,7 @@ function Framework.GetPlayerName(source)
             return xPlayer.getName()
         end
     end
-    
+
     local name = GetPlayerName(source)
     return name and name ~= '' and name or 'Unknown'
 end
