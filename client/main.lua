@@ -1,7 +1,3 @@
---[[ ===================================================== ]]--
---[[          CLIENT MAIN LOGIC (FIXED & OPTIMIZED)       ]]--
---[[ ===================================================== ]]--
-
 local isMenuOpen = false
 local vehicleData = {}
 local playerCache = {}
@@ -9,24 +5,20 @@ local isAdmin = false
 local nuiFocusActive = false
 local controlThread = nil
 
---[[ ===================================================== ]]--
---[[              CACHE SYSTEM (OTIMIZADO)                 ]]--
---[[ ===================================================== ]]--
-
 function GetFromCache(key)
     if not Config.Cache.enabled then return nil end
-    
+
     local cached = playerCache[key]
     if cached and cached.expires > GetGameTimer() then
         return cached.data
     end
-    
+
     return nil
 end
 
 function SetCache(key, data)
     if not Config.Cache.enabled then return end
-    
+
     playerCache[key] = {
         data = data,
         expires = GetGameTimer() + (Config.Cache.clientTTL * 1000)
@@ -37,36 +29,31 @@ function ClearCache()
     playerCache = {}
 end
 
--- Cache Cleanup Thread (otimização FASE 2)
 CreateThread(function()
     while true do
         Wait(Config.Cache.cleanupInterval * 1000)
-        
+
         if not Config.Cache.enabled then
             goto continue
         end
-        
+
         local now = GetGameTimer()
         local cleaned = 0
-        
+
         for key, cached in pairs(playerCache) do
             if cached.expires < now then
                 playerCache[key] = nil
                 cleaned = cleaned + 1
             end
         end
-        
+
         if Config.Debug and cleaned > 0 then
             print('^3[VehicleImages]^7 Client cleaned ' .. cleaned .. ' expired cache entries')
         end
-        
+
         ::continue::
     end
 end)
-
---[[ ===================================================== ]]--
---[[                  NUI CALLBACKS                         ]]--
---[[ ===================================================== ]]--
 
 RegisterNUICallback('close', function(data, cb)
     if nuiFocusActive then
@@ -91,14 +78,14 @@ RegisterNUICallback('addVehicle', function(data, cb)
         cb({status = 'error'})
         return
     end
-    
+
     TriggerServerEvent('vehicleimages:addVehicle', {
         name = data.model,
         url = data.url,
         category = data.category or 'other',
         custom = data.custom or false
     })
-    
+
     cb({status = 'ok'})
 end)
 
@@ -108,13 +95,13 @@ RegisterNUICallback('updateVehicle', function(data, cb)
         cb({status = 'error'})
         return
     end
-    
+
     TriggerServerEvent('vehicleimages:updateVehicle', data.model, {
         url = data.url,
         category = data.category,
         custom = data.custom
     })
-    
+
     cb({status = 'ok'})
 end)
 
@@ -124,9 +111,9 @@ RegisterNUICallback('deleteVehicle', function(data, cb)
         cb({status = 'error'})
         return
     end
-    
+
     TriggerServerEvent('vehicleimages:deleteVehicle', data.model)
-    
+
     cb({status = 'ok'})
 end)
 
@@ -146,9 +133,9 @@ RegisterNUICallback('importData', function(data, cb)
         cb({status = 'error'})
         return
     end
-    
+
     TriggerServerEvent('vehicleimages:importData', data.data, data.overwrite)
-    
+
     cb({status = 'ok'})
 end)
 
@@ -158,9 +145,9 @@ RegisterNUICallback('exportData', function(data, cb)
         cb({status = 'error'})
         return
     end
-    
+
     TriggerServerEvent('vehicleimages:exportData')
-    
+
     cb({status = 'ok'})
 end)
 
@@ -169,14 +156,10 @@ RegisterNUICallback('playSound', function(data, cb)
     cb({status = 'ok'})
 end)
 
---[[ ===================================================== ]]--
---[[                  EVENTOS DO SERVIDOR                   ]]--
---[[ ===================================================== ]]--
-
 RegisterNetEvent('vehicleimages:receiveData', function(data)
     vehicleData = data.vehicles or {}
     isAdmin = data.isAdmin or false
-    
+
     SendNUIMessage({
         action = 'loadData',
         data = {
@@ -186,8 +169,7 @@ RegisterNetEvent('vehicleimages:receiveData', function(data)
             config = data.config
         }
     })
-    
-    -- Atualizar estado global (CORREÇÃO FASE 1.5)
+
     _G.VehicleImagesState = {
         vehicleData = vehicleData,
         playerCache = playerCache,
@@ -199,7 +181,7 @@ end)
 RegisterNetEvent('vehicleimages:receiveImage', function(model, url)
     local cacheKey = 'image_' .. string.lower(model)
     SetCache(cacheKey, url)
-    
+
     SendNUIMessage({
         action = 'receiveImage',
         model = model,
@@ -220,7 +202,7 @@ RegisterNetEvent('vehicleimages:vehicleUpdated', function(model, vehicle)
         model = model,
         vehicle = vehicle
     })
-    
+
     local cacheKey = 'image_' .. string.lower(model)
     playerCache[cacheKey] = nil
 end)
@@ -230,7 +212,7 @@ RegisterNetEvent('vehicleimages:vehicleDeleted', function(model)
         action = 'vehicleDeleted',
         model = model
     })
-    
+
     local cacheKey = 'image_' .. string.lower(model)
     playerCache[cacheKey] = nil
 end)
@@ -291,26 +273,21 @@ RegisterNetEvent('vehicleimages:openImport', function()
     })
 end)
 
---[[ ===================================================== ]]--
---[[                  FUNÇÕES AUXILIARES                    ]]--
---[[ ===================================================== ]]--
-
 function OpenMenu()
     if isMenuOpen then return end
-    
+
     isMenuOpen = true
     nuiFocusActive = true
     SetNuiFocus(true, true)
-    
+
     TriggerServerEvent('vehicleimages:requestData')
-    
+
     SendNUIMessage({
         action = 'show'
     })
-    
+
     PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
-    
-    -- Iniciar thread de controles (CORREÇÃO FASE 1.2)
+
     if not controlThread then
         controlThread = CreateThread(function()
             while isMenuOpen do
@@ -329,15 +306,15 @@ end
 
 function CloseMenu()
     if not isMenuOpen then return end
-    
+
     isMenuOpen = false
     nuiFocusActive = false
     SetNuiFocus(false, false)
-    
+
     SendNUIMessage({
         action = 'hide'
     })
-    
+
     PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
 end
 
@@ -359,29 +336,21 @@ function ShowNotification(type, message)
     end
 end
 
---[[ ===================================================== ]]--
---[[                  EVENTOS DE TECLAS                     ]]--
---[[ ===================================================== ]]--
-
 CreateThread(function()
     while true do
         Wait(0)
-        
+
         if IsControlJustPressed(0, 322) and isMenuOpen then
             CloseMenu()
         end
     end
 end)
 
---[[ ===================================================== ]]--
---[[                  INICIALIZAÇÃO                        ]]--
---[[ ===================================================== ]]--
-
 AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() == resourceName then
         Wait(1000)
         TriggerServerEvent('vehicleimages:requestData')
-        
+
         if Config.Debug then
             print('^2[VehicleImages]^7 Client started successfully!')
         end
@@ -393,18 +362,14 @@ AddEventHandler('onResourceStop', function(resourceName)
         if isMenuOpen then
             CloseMenu()
         end
-        
+
         ClearCache()
-        
+
         if Config.Debug then
             print('^3[VehicleImages]^7 Client stopped.')
         end
     end
 end)
-
---[[ ===================================================== ]]--
---[[                  DEBUGGING                             ]]--
---[[ ===================================================== ]]--
 
 if Config.Debug then
     RegisterCommand('vehtest', function(source, args)
@@ -415,7 +380,7 @@ if Config.Debug then
             print('Usage: /vehtest [model]')
         end
     end, false)
-    
+
     RegisterCommand('vehcache', function()
         print('=== CACHE STATUS ===')
         local count = 0
@@ -425,7 +390,7 @@ if Config.Debug then
         end
         print(string.format('Total cached items: %d', count))
     end, false)
-    
+
     RegisterCommand('vehclear', function()
         ClearCache()
         print('Cache cleared!')
