@@ -1,75 +1,63 @@
---[[ ===================================================== ]]--
---[[                  CONFIGURAÇÕES V2.1                  ]]--
---[[ ===================================================== ]]--
-
 Config = {}
 
---[[ Configurações Gerais ]]--
-Config.Debug = false -- Ativar mensagens de debug (DESLIGAR EM PRODUÇÃO!)
-Config.Language = 'en' -- Idioma do sistema (pt, en, es, fr)
-Config.Framework = 'standalone' -- 'standalone' ou 'esx' (detecta automaticamente)
+Config.Debug = false 
+Config.Language = 'en' 
+Config.Framework = 'standalone' 
 
---[[ Sistema de Armazenamento ]]--
-Config.StorageType = 'json' -- Tipo de armazenamento: 'json' ou 'mysql' (futuro)
-Config.JsonPath = 'data/vehicles.json' -- Caminho do ficheiro JSON
-Config.AutoSave = true -- Guardar automaticamente após alterações
-Config.SaveInterval = 300000 -- Intervalo de auto-save em ms (5 minutos)
+Config.StorageType = 'json' 
+Config.JsonPath = 'data/vehicles.json' 
+Config.AutoSave = true 
+Config.SaveInterval = 300000 
 
---[[ Permissões ]]--
-Config.UsePermissions = false -- Ativar sistema de permissões ACE
+Config.UsePermissions = false 
 Config.AdminGroups = {
     'admin',
     'mod',
     'superadmin'
-} -- Grupos com permissão para editar (ACE ou ESX)
+} 
 
-Config.AllowPublicView = true -- Permitir todos verem a interface (apenas leitura)
-Config.AllowPublicPreview = true -- Permitir comando de preview público
+Config.AllowPublicView = true 
+Config.AllowPublicPreview = true 
 
---[[ Rate Limiting ]]--
 Config.RateLimits = {
     enabled = true,
-    openMenu = 2, -- Segundos entre aberturas de menu
-    preview = 1, -- Segundos entre previews
-    addVehicle = 5, -- Segundos entre adições
-    editVehicle = 3, -- Segundos entre edições
-    deleteVehicle = 5 -- Segundos entre eliminações
+    openMenu = 2, 
+    preview = 1, 
+    addVehicle = 5, 
+    editVehicle = 3, 
+    deleteVehicle = 5 
 }
 
---[[ Comandos ]]--
 Config.Commands = {
-    openMenu = 'vehicleimages', -- Comando para abrir menu de gestão
-    preview = 'vehimg', -- Comando para preview rápido
-    import = 'vehimport', -- Comando para importar JSON
-    export = 'vehexport', -- Comando para exportar JSON
-    reload = 'vehreload' -- Comando para recarregar base de dados
+    openMenu = 'vehicleimages', 
+    preview = 'vehimg', 
+    import = 'vehimport', 
+    export = 'vehexport', 
+    reload = 'vehreload' 
 }
 
---[[ Interface (NUI) ]]--
 Config.UI = {
-    theme = 'dark', -- Tema da interface: 'dark' ou 'light'
-    accentColor = '#007bff', -- Cor de destaque (azul por padrão)
-    maxItemsPerPage = 50, -- Máximo de itens por página
-    showCategories = true, -- Mostrar categorias
-    showSearch = true, -- Mostrar barra de pesquisa
-    showStats = true, -- Mostrar estatísticas
-    animationSpeed = 300 -- Velocidade de animações em ms
+    theme = 'dark', 
+    accentColor = '#007bff', 
+    maxItemsPerPage = 50, 
+    showCategories = true, 
+    showSearch = true, 
+    showStats = true, 
+    animationSpeed = 300 
 }
 
---[[ Cache ]]--
 Config.Cache = {
-    enabled = true, -- Ativar sistema de cache
-    clientTTL = 3600, -- Tempo de vida do cache client (segundos)
-    serverTTL = 7200, -- Tempo de vida do cache server (segundos)
-    preloadAll = false, -- Pré-carregar todas as imagens ao iniciar
-    cleanupInterval = 300 -- Limpar cache expirado a cada X segundos
+    enabled = true, 
+    clientTTL = 3600, 
+    serverTTL = 7200, 
+    preloadAll = false, 
+    cleanupInterval = 300 
 }
 
---[[ Imagens ]]--
 Config.Images = {
-    placeholder = 'https://via.placeholder.com/400x300/1f2937/ffffff?text=Sem+Imagem', -- Imagem padrão
-    fallbackOnError = true, -- Usar placeholder se URL falhar
-    allowedDomains = { -- Domínios permitidos (deixar vazio para permitir todos)
+    placeholder = 'https://via.placeholder.com/400x300/1f2937/ffffff?text=Sem+Imagem', 
+    fallbackOnError = true, 
+    allowedDomains = { 
         'raw.githubusercontent.com',
         'i.imgur.com',
         'r2.fivemanage.com',
@@ -77,9 +65,9 @@ Config.Images = {
         'res.cloudinary.com',
         'image.noelshack.com'
     },
-    maxUrlLength = 500, -- Comprimento máximo de URL
-    validateUrls = true, -- Validar URLs antes de guardar
-    allowedContentTypes = { -- Content-Types permitidos (segurança XSS)
+    maxUrlLength = 500, 
+    validateUrls = true, 
+    allowedContentTypes = { 
         'image/png',
         'image/jpeg',
         'image/jpg',
@@ -87,7 +75,6 @@ Config.Images = {
     }
 }
 
---[[ Categorias de Veículos ]]--
 Config.Categories = {
     {id = 'super', label = 'Super', icon = '🏎️'},
     {id = 'sports', label = 'Desportivos', icon = '🚗'},
@@ -111,11 +98,10 @@ Config.Categories = {
     {id = 'other', label = 'Outros', icon = '❓'}
 }
 
---[[ Logs ]]--
 Config.Logs = {
-    enabled = false, -- Ativar sistema de logs
-    saveToFile = false, -- Guardar logs em ficheiro (não implementado)
-    logActions = { -- Ações a registar
+    enabled = false, 
+    saveToFile = false, 
+    logActions = { 
         'add',
         'edit',
         'delete',
@@ -125,20 +111,18 @@ Config.Logs = {
     }
 }
 
---[[ Exportação/Importação ]]--
 Config.ImportExport = {
-    maxImportSize = 10000, -- Máximo de veículos em importação única
-    validateBeforeImport = true, -- Validar dados antes de importar
-    backupBeforeImport = true, -- Criar backup antes de importar
-    allowOverwrite = true, -- Permitir sobrescrever entradas existentes
-    exportFormat = 'json' -- Formato de exportação: 'json'
+    maxImportSize = 10000, 
+    validateBeforeImport = true, 
+    backupBeforeImport = true, 
+    allowOverwrite = true, 
+    exportFormat = 'json' 
 }
 
---[[ Notificações ]]--
 Config.Notifications = {
     enabled = true,
-    position = 'top-right', -- Posição: 'top-right', 'top-left', 'bottom-right', 'bottom-left'
-    duration = 3000, -- Duração em ms
+    position = 'top-right', 
+    duration = 3000, 
     types = {
         success = {color = '#10b981', icon = '✓'},
         error = {color = '#ef4444', icon = '✗'},
@@ -147,7 +131,6 @@ Config.Notifications = {
     }
 }
 
---[[ Traduções ]]--
 Config.Translations = {
     pt = {
         menu_title = 'Gestão de Imagens de Veículos',
@@ -217,14 +200,13 @@ Config.Translations = {
     }
 }
 
---[[ Função Helper para obter tradução ]]--
 function Config.Translate(key, ...)
     local lang = Config.Language
     local translation = Config.Translations[lang] and Config.Translations[lang][key] or key
-    
+
     if ... then
         return string.format(translation, ...)
     end
-    
+
     return translation
 end
